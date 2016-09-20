@@ -9,5 +9,5 @@ This image is used to demonstrate a simple Hello World Docker image using NGINX.
 Start the container and publish port 80 to some port on the host.
 
 ```
-docker run -d -p 80 scottsbaldwin/docker-hello-world
+docker run -d -p 8080:80 jmreeve007/docker-hello-world
 ```
