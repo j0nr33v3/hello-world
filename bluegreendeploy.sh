@@ -49,7 +49,7 @@ WAIT_SECONDS=10
 HEALTHY=0
 while [ $TRY -lt $MAX_TRIES ]; do
  TRY=$(( $TRY + 1 ))
- RESPONSE=$(curl ${INSECURE_CURL} -s -XGET -H "Authorization: Bearer ${API_TOKEN}" ${SERVICE_MANAGER}/api/v2/deployments/${APP_NAME}-${TARGET_COLOR} | jq ".deployment | .current_state == .desired_state")
+ RESPONSE=$(curl ${INSECURE_CURL} -s -XGET -H "Authorization: Bearer ${API_TOKEN}" ${SERVICE_MANAGER}/api/v2/deployments/${APP_NAME}-${TARGET_COLOR} | recode html..ascii| jq ".deployment | .current_state == .desired_state")
 
  if [ "$RESPONSE" == "true" ]; then
   HEALTHY=1
@@ -91,7 +91,7 @@ WAIT_SECONDS=10
 STOPPED=0
 while [ $TRY -lt $MAX_TRIES ]; do
  TRY=$(( $TRY + 1 ))
- RESPONSE=$(curl ${INSECURE_CURL} -s -XGET -H "Authorization: Bearer ${API_TOKEN}" ${SERVICE_MANAGER}/api/v2/deployments/${APP_NAME}-${TARGET_COLOR} | jq ".deployment | .current_state == .desired_state")
+ RESPONSE=$(curl ${INSECURE_CURL} -s -XGET -H "Authorization: Bearer ${API_TOKEN}" ${SERVICE_MANAGER}/api/v2/deployments/${APP_NAME}-${TARGET_COLOR} | recode html..ascii| jq ".deployment | .current_state == .desired_state")
 
  if [ "$RESPONSE" == "true" ]; then
   STOPPED=1
@@ -112,10 +112,10 @@ if [ $STOPPED -gt 0 ]; then
   while [ $TRY -lt $MAX_TRIES ]; do
    TRY=$(( $TRY + 1 ))
    RESPONSE=$(curl ${INSECURE_CURL} -s -XDELETE -H "Authorization: Bearer ${API_TOKEN}" ${SERVICE_MANAGER}/api/v2/deployments/${APP_NAME}-${ORIGINAL_COLOR})
-   ERROR_COUNT=$(echo ${RESPONSE} | jq -r ".errors | length")
+   ERROR_COUNT=$(echo ${RESPONSE} | recode html..ascii| jq -r ".errors | length")
 
    if [ $ERROR_COUNT -gt 0 ]; then
-    ERRORS=$(echo ${RESPONSE} | jq ".errors[].message")
+    ERRORS=$(echo ${RESPONSE} | recode html..ascii| jq ".errors[].message")
     echo "${TRY} of ${MAX_TRIES} removal tries. ${ERRORS}"
    else
     REMOVED=1
