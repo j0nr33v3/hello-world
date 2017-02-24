@@ -6,6 +6,7 @@ install:
   - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
   - docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TRAVIS_BUILD_NUMBER} .
   - docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TRAVIS_BUILD_NUMBER}
+  - sudo apt-get install recode
 script:
   - ./bluegreendeploy.sh
 #  - ./rollingdeploy.sh
