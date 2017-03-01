@@ -75,65 +75,65 @@ curl ${INSECURE_CURL} -s -XPUT -H "Authorization: Bearer ${API_TOKEN}" -d "${TAR
 # Step 6: Remove original deployment
 # ------------------------------------
 
-HTTP_CODE=$(curl ${INSECURE_CURL} -s -XGET -o /dev/null -w "%{http_code}" -H "Authorization: Bearer ${API_TOKEN}" ${SERVICE_MANAGER}/api/v2/deployments/${APP_NAME}-${ORIGINAL_COLOR})
-if [ $HTTP_CODE -eq 404 ]; then
-  echo "Tried to remove inactive deployment ${APP_NAME}-${ORIGINAL_COLOR} but it doesn't exist."
-  exit 0
-fi
+#HTTP_CODE=$(curl ${INSECURE_CURL} -s -XGET -o /dev/null -w "%{http_code}" -H "Authorization: Bearer ${API_TOKEN}" ${SERVICE_MANAGER}/api/v2/deployments/${APP_NAME}-${ORIGINAL_COLOR})
+#if [ $HTTP_CODE -eq 404 ]; then
+  #echo "Tried to remove inactive deployment ${APP_NAME}-${ORIGINAL_COLOR} but it doesn't exist."
+ # exit 0
+#fi
 
 # First, the deployment must be stopped
-curl ${INSECURE_CURL} -s -XPOST -H "Authorization: Bearer ${API_TOKEN}" ${SERVICE_MANAGER}/api/v2/deployments/${APP_NAME}-${ORIGINAL_COLOR}/stop
+#curl ${INSECURE_CURL} -s -XPOST -H "Authorization: Bearer ${API_TOKEN}" ${SERVICE_MANAGER}/api/v2/deployments/${APP_NAME}-${ORIGINAL_COLOR}/stop
 
 # Make sure it has stopped
-TRY=0
-MAX_TRIES=30
-WAIT_SECONDS=10
-STOPPED=0
-while [ $TRY -lt $MAX_TRIES ]; do
- TRY=$(( $TRY + 1 ))
- RESPONSE=$(curl ${INSECURE_CURL} -s -XGET -H "Authorization: Bearer ${API_TOKEN}" ${SERVICE_MANAGER}/api/v2/deployments/${APP_NAME}-${TARGET_COLOR} | recode html..ascii| jq ".deployment | .current_state == .desired_state")
+#TRY=0
+#MAX_TRIES=30
+#WAIT_SECONDS=10
+#STOPPED=0
+#while [ $TRY -lt $MAX_TRIES ]; do
+ #TRY=$(( $TRY + 1 ))
+ #RESPONSE=$(curl ${INSECURE_CURL} -s -XGET -H "Authorization: Bearer ${API_TOKEN}" ${SERVICE_MANAGER}/api/v2/deployments/${APP_NAME}-${TARGET_COLOR} | recode html..ascii| jq ".deployment | .current_state == .desired_state")
 
- if [ "$RESPONSE" == "true" ]; then
-  STOPPED=1
-  break
- fi
- echo "Current and desired state of deployment do not match. ${TRY} of ${MAX_TRIES} tries."
- sleep $WAIT_SECONDS
-done
+ #if [ "$RESPONSE" == "true" ]; then
+ # STOPPED=1
+ # break
+ #fi
+ #echo "Current and desired state of deployment do not match. ${TRY} of ${MAX_TRIES} tries."
+ #sleep $WAIT_SECONDS
+#done
 
-if [ $STOPPED -gt 0 ]; then
+#if [ $STOPPED -gt 0 ]; then
   # Finally, remove the deployment, and reset the ID
-  echo "Original deployment has stopped. Removing the deployment for ${APP_NAME}-${ORIGINAL_COLOR}."
+  #echo "Original deployment has stopped. Removing the deployment for ${APP_NAME}-${ORIGINAL_COLOR}."
 
-  TRY=0
-  MAX_TRIES=30
-  WAIT_SECONDS=10
-  REMOVED=0
-  while [ $TRY -lt $MAX_TRIES ]; do
-   TRY=$(( $TRY + 1 ))
-   RESPONSE=$(curl ${INSECURE_CURL} -s -XDELETE -H "Authorization: Bearer ${API_TOKEN}" ${SERVICE_MANAGER}/api/v2/deployments/${APP_NAME}-${ORIGINAL_COLOR})
-   ERROR_COUNT=$(echo ${RESPONSE} | recode html..ascii| jq -r ".errors | length")
+  #TRY=0
+  #MAX_TRIES=30
+  #WAIT_SECONDS=10
+  #REMOVED=0
+  #while [ $TRY -lt $MAX_TRIES ]; do
+   #TRY=$(( $TRY + 1 ))
+   #RESPONSE=$(curl ${INSECURE_CURL} -s -XDELETE -H "Authorization: Bearer ${API_TOKEN}" ${SERVICE_MANAGER}/api/v2/deployments/${APP_NAME}-${ORIGINAL_COLOR})
+   #ERROR_COUNT=$(echo ${RESPONSE} | recode html..ascii| jq -r ".errors | length")
 
-   if [ $ERROR_COUNT -gt 0 ]; then
-    ERRORS=$(echo ${RESPONSE} | recode html..ascii| jq ".errors[].message")
-    echo "${TRY} of ${MAX_TRIES} removal tries. ${ERRORS}"
-   else
-    REMOVED=1
-    break
-   fi
-   sleep $WAIT_SECONDS
-  done
+   #if [ $ERROR_COUNT -gt 0 ]; then
+    #ERRORS=$(echo ${RESPONSE} | recode html..ascii| jq ".errors[].message")
+    #echo "${TRY} of ${MAX_TRIES} removal tries. ${ERRORS}"
+   #else
+    #REMOVED=1
+    #break
+   #fi
+   #sleep $WAIT_SECONDS
+  #done
 
-  if [ $REMOVED -gt 0 ]; then
-    echo "Deployment ${APP_NAME}-${ORIGINAL_COLOR} has been removed."
-    curl ${INSECURE_CURL} -s -XPUT -H "Authorization: Bearer ${API_TOKEN}" -d "blue-green/null" ${SERVICE_MANAGER}/api/kv/blue-green/${APP_NAME}/${ORIGINAL_COLOR}/id
-  else
-    echo "Checked ${MAX_TRIES} times but ${APP_NAME}-${ORIGINAL_COLOR} is not removed. You may need to remove it manually."
-  fi
+  #if [ $REMOVED -gt 0 ]; then
+   # echo "Deployment ${APP_NAME}-${ORIGINAL_COLOR} has been removed."
+  #  curl ${INSECURE_CURL} -s -XPUT -H "Authorization: Bearer ${API_TOKEN}" -d "blue-green/null" ${SERVICE_MANAGER}/api/kv/blue-green/${APP_NAME}/${ORIGINAL_COLOR}/id
+ # else
+ #   echo "Checked ${MAX_TRIES} times but ${APP_NAME}-${ORIGINAL_COLOR} is not removed. You may need to remove it manually."
+#  fi
 
-else
-  echo "Checked ${MAX_TRIES} times but deployment is not stopped. You may need to stop it manually."
-fi
+#else
+#  echo "Checked ${MAX_TRIES} times but deployment is not stopped. You may need to stop it manually."
+#fi
 
 # ------------------------------------
 # We made it to the end. All is well!
