@@ -8,6 +8,6 @@ install:
   - docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${TRAVIS_BUILD_NUMBER}
   - sudo apt-get install recode
 script:
-  - ./bluegreendeploy.sh
-#  - ./rollingdeploy.sh
+#  - ./bluegreendeploy.sh
+  - ./rollingdeploy.sh
 #  - true
